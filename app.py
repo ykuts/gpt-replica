@@ -36,22 +36,32 @@ st.title("🤖 Conversational Chatbot")
 st.subheader("Simple Chatbot")
 
 
-if prompt := st.chat_input("What do you want to ask?"): # Prompt for user input and save to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
+# User input
+if prompt := st.chat_input("What do you want to ask?"):  # Prompt for user input
+    if prompt.strip():  # Ensure the prompt is not empty
+        st.session_state.messages.append({"role": "user", "content": prompt})
 
 for message in st.session_state.messages: # Display the prior chat messages
     with st.chat_message(message["role"]):
         st.write(message["content"])
 
-system_message = "You are a CookTasty, a helpful AI assistant. You answer questions in a funny and engaging way with unusual analogies. You don't answer any questions not related to cooking. Please respond with 'I cannot answer the question' for non-cooking questions."
+# Define system message for assistant's behavior
+system_message = ("You are a CookTasty, a helpful AI assistant. "
+                  "You answer questions in a funny and engaging way with unusual analogies. "
+                  "You don't answer any questions not related to cooking. "
+                  "Please respond with 'I cannot answer the question' for non-cooking questions.")
 
-# If last message is not from assistant, generate a new response
+# If last message is from the user, generate a response from the assistant
 if st.session_state.messages and st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner("I'm thinking..."):
+            # Construct conversation messages for the assistant
             messages = [SystemMessage(content=system_message),
-                        HumanMessage(content=prompt)]
+                        HumanMessage(content=st.session_state.messages[-1]["content"])]  # Last user message
+            
+            # Generate response from the assistant
             response = conversation.run(messages)
             st.write(response)
-            message = {"role": "assistant", "content": response}
-            st.session_state.messages.append(message) # Add response to message history
+            
+            # Append assistant's response to the message history
+            st.session_state.messages.append({"role": "assistant", "content": response})
