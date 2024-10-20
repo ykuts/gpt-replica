@@ -1,2 +1,0 @@
-# gpt-replica
-ChatGPT replica
